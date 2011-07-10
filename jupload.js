@@ -75,19 +75,13 @@ var jUpload = function() {
 	
 	function checkua()
 	{
-		
-		alert('FileReader' in window);
-		alert('FormData' in window);
 		if(! ('FileReader' in window) )
 			return false;
-
- 
-
+			
 		if(! ('FormData' in window) )
 			yesnotwork = true;
 			
 			return true;
-			
 	}
 	
 	function generateBoundary() 
