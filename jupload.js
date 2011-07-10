@@ -19,20 +19,19 @@
 
 
 var jUpload = function() {
-
-
-	var dropbox = document.getElementById( "dropbox" );
-	var queue=[]; var uploas= []; 
-
+	
+	var dropbox = document.getElementById( "dropbox" ),
+		preview	= document.getElementById( 'preview' ),
+		uploadyes = document.getElementById( "upload" ),
+		yesnotwork = false, queue = [], uploas = []; 
+	
+ 	uploadyes.addEventListener( "click", upload, false );
  
 	dropbox.addEventListener( "drop", readFiles, false );
 	dropbox.addEventListener( "dragleave", cancel, false );
 	dropbox.addEventListener( "dragover", cancel, false );
 	dropbox.addEventListener( "dragenter", cancel, false );
-
-	var uploadyes = document.getElementById( "upload" );
-	uploadyes.addEventListener( "click", upload, false );
-
+	
 	function cancel( event )
 	{
 		event.stopPropagation();
@@ -64,7 +63,7 @@ var jUpload = function() {
 	function setFiles( file )
 	{
 		var img		= document.createElement( 'img' );
-		var preview	= document.getElementById( 'preview' );
+
 		img.id		= "imgpreview";
 		img.file	= file;
 		img.src		= file.target.result;
@@ -76,13 +75,19 @@ var jUpload = function() {
 	
 	function checkua()
 	{
-		if( window.FileReader )
-			return true;
 		
-		if( window.FormData )
+		alert('FileReader' in window);
+		alert('FormData' in window);
+		if(! ('FileReader' in window) )
 			return false;
 
-		return false;
+ 
+
+		if(! ('FormData' in window) )
+			yesnotwork = true;
+			
+			return true;
+			
 	}
 	
 	function generateBoundary() 
@@ -92,8 +97,8 @@ var jUpload = function() {
 	
 	function bluildpack(file, boundary)
 	{						 
-		var mex		= '';
- 		var	crlf	= '\r\n';
+		var mex	 = '',
+			crlf = '\r\n';
 
 		mex  = '--' + boundary + crlf;
 		mex += 'Content-Disposition: form-data; name="Files[]"; filename="'+file.name+'"'+ crlf;
@@ -108,24 +113,46 @@ var jUpload = function() {
 	function upload() 
 	{
 		var boundary = generateBoundary();
-
- 		if( checkua() ) {
- 			var leng = queue.length;
+		checkua();
+ 		if(! yesnotwork ) {
+			var fd	 = new FormData,
+				leng = queue.length;
  
 			for( var i = 0; i < leng; i++ ) {
-				bluildpack(queue.shift(), boundary   );
+				fd.append('Upload[file]', queue.shift());
+				uploas.push(fd);
 			}
 			
 			var upls = uploas.length;
 
 			for( var l = 0; l < upls; l++ ) {
-				var	xhr	= new XMLHttpRequest();
-				
+				var	xhr	= new XMLHttpRequest(),
+					imgr = document.getElementsByTagName('img')[0];
+
+				xhr.open("POST", "upload.php", true);
+				xhr.setRequestHeader('Content-Type', 'multipart/form-data; boundary=' + boundary);
+				xhr.send(uploas.shift());
+
+				preview.removeChild(imgr);
+			}		
+		} else {
+ 			var leng = queue.length;
+ 
+			for( var i = 0; i < leng; i++ )
+				bluildpack(queue.shift(), boundary );
+			
+			var upls = uploas.length;
+
+			for( var l = 0; l < upls; l++ ) {
+				var	xhr	= new XMLHttpRequest(),
+					imgr = document.getElementsByTagName('img')[0];
+
 				xhr.open("POST", "upload.php", true);
 				xhr.setRequestHeader('Content-Type', 'multipart/form-data; boundary=' + boundary);
 				xhr.sendAsBinary(uploas.shift());
+				
+				preview.removeChild(imgr);
 			}
 		}
-	}
-	
+	} // end upload func
 }
