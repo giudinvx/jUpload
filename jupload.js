@@ -20,9 +20,9 @@
 
 var jUpload = function() {
 
+
 	var dropbox = document.getElementById( "dropbox" );
 	var queue=[]; var uploas= []; 
-	var	xhr	= new XMLHttpRequest();
 
  
 	dropbox.addEventListener( "drop", readFiles, false );
@@ -52,7 +52,7 @@ var jUpload = function() {
 			
 			if( file.type.toLowerCase().match(/image.*/) ) {
 				var freader = new FileReader();
-				queue.push(file);
+ 				queue.push(file);
 				freader.onload = function( file ) {
 					setFiles( file );
 				};
@@ -70,7 +70,7 @@ var jUpload = function() {
 		img.src		= file.target.result;
 		img.height 	= 100;
 		img.width 	= 150;
-		
+
 		preview.appendChild( img );
 	}
 	
@@ -115,12 +115,16 @@ var jUpload = function() {
 			for( var i = 0; i < leng; i++ ) {
 				bluildpack(queue.shift(), boundary   );
 			}
- 
-		}
-		for( var l = 0; l < uploas.length; l++ ) {
-			xhr.open("POST", "upload.php", true);
-			xhr.setRequestHeader('Content-Type', 'multipart/form-data; boundary=' + boundary);
-			xhr.sendAsBinary(uploas.shift());		 
+			
+			var upls = uploas.length;
+
+			for( var l = 0; l < upls; l++ ) {
+				var	xhr	= new XMLHttpRequest();
+				
+				xhr.open("POST", "upload.php", true);
+				xhr.setRequestHeader('Content-Type', 'multipart/form-data; boundary=' + boundary);
+				xhr.sendAsBinary(uploas.shift());
+			}
 		}
 	}
 	
